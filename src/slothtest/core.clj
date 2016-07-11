@@ -140,7 +140,7 @@
    :result `~(eval (ns-resolve-list the-expression))})
 
 (defmacro expect-spec [the-expression result]
-  (save-specification (ns-resolve-list the-expression) `~result))
+  (save-specification (ns-resolve-list the-expression) `'~result))
 
 (defmacro remove-spec [the-expression]
   (drop-specification (ns-resolve-list the-expression)))
