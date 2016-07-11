@@ -39,6 +39,11 @@ wanted you could:
 (expect-spec (+ 1 2) 3)
 ```
 
+## What about duplicates?
+
+If you evaluate (+ 1 2) list multiple times the last one will be saved.
+(+ 1 2) is saved as a simple list, therefore, has unique key in the hash map.
+
 Default test namespace is read from project.clj (as project name),
 however, it may be changed with:
 ```clojure
