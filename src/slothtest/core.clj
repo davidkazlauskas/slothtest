@@ -21,8 +21,7 @@
 ; 2 - the map of sterf
 ; 3 - the the deftest sucka
 (defn- structure-test [the-struct]
-  {:namespace (first the-struct)
-   :curr-tests (last (second the-struct))
+  {:curr-tests (last (second the-struct))
    :testdef (last the-struct)})
 
 (defn- gen-test-def [the-map]
@@ -31,11 +30,14 @@
        ~@(for [[func res] the-map]
           `(~'is (~'= ~(eval func) ~res))))))
 
+(defn default-ns-decl [reqlist]
+  `(~'ns ~(symbol (str *notestns* ".autogen_test"))
+     (:require [clojure.test :refer :all]
+               ~@reqlist)))
+
 (defn- default-struct []
   ; TODO: no hardcoding
-  {:namespace `(~'ns ~(symbol (str *notestns* ".autogen_test"))
-                 (:require [clojure.test :refer :all]))
-   :curr-tests '{}
+  {:curr-tests '{}
    :testdef (gen-test-def {})})
 
 (defn- pull-namespaces [symb-list]
@@ -74,9 +76,15 @@
   (clojure.pprint/write
     the-struct :stream nil))
 
+(defn gen-ns-decl [the-struct]
+  (default-ns-decl
+    (map
+      #(vector (symbol %))
+      (symbol-set the-struct))))
+
 (defn- struct-to-source [the-struct]
   (clojure.string/join "\n\n"
-                       [(ppr (:namespace the-struct))
+                       [(ppr (gen-ns-decl the-struct))
                         (ppr `(def ~'test-data ~(:curr-tests the-struct)))
                         (ppr (gen-test-def (:curr-tests the-struct)))]))
 

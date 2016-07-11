@@ -1,6 +1,6 @@
 (ns
  slothtest.autogen_test
- (:require [clojure.test :refer :all] [slothtest.core]))
+ (:require [clojure.test :refer :all] [slothtest.core] [clojure.core]))
 
 (def
  test-data
