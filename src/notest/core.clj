@@ -58,12 +58,15 @@
 (defn add-test-expr [the-map func the-val]
   (assoc-in the-map [:curr-tests func] the-val))
 
+(defn save-specification [expr result]
+  (save-struct
+    (add-test-expr (curr-test-struct) expr result)))
+
 (defmacro save-spec [the-expression]
-  (let [the-result (eval the-expression)
-        curr (curr-test-struct)]
-    (println the-result)
-    (save-struct
-      (add-test-expr curr the-expression the-result))))
+  (save-specification the-expression (eval the-expression)))
+
+(defmacro expect-spec [the-expression result]
+  (save-specification the-expression result))
 
 (defn foo
   "I don't do a whole lot."
