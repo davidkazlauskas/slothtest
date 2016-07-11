@@ -81,10 +81,10 @@
     (remove-test-expr (curr-test-struct) expr)))
 
 (defmacro save-spec [the-expression]
-  (save-specification `'~the-expression (eval the-expression)))
+  (save-specification `'~the-expression `'~(eval the-expression)))
 
 (defmacro expect-spec [the-expression result]
-  (save-specification `'~the-expression result))
+  (save-specification `'~the-expression `'~result))
 
 (defmacro remove-spec [the-expression]
   (drop-specification `'~the-expression))
