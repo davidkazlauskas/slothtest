@@ -1,4 +1,4 @@
-(ns notest.core
+(ns slothtest.core
   (:require [clojure.pprint :refer [write]]))
 
 (defn- read-project-name-from-lein []

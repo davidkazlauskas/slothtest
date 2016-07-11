@@ -1,4 +1,4 @@
-(ns notest.core-test
+(ns slothtest.core-test
   (:require [clojure.test :refer :all]
             [notest.core :refer :all]))
 
