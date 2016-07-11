@@ -46,6 +46,17 @@ wanted you could:
 If you evaluate (+ 1 2) list multiple times the last one will be saved.
 (+ 1 2) is saved as a simple list, therefore, has unique key in the hash map.
 
+## Removing expression
+
+If something got stale and you don't want to open test generation file remove it with:
+
+```clojure
+(remove-spec (+ 1 2))
+```
+
+Symbols don't have to exist, so, if function is gone, you can just remove typing
+non-existant expression.
+
 ## Namespaces
 
 Default test namespace is read from project.clj (as project name),

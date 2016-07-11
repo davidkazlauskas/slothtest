@@ -1,6 +1,6 @@
 (ns slothtest.autogen_test (:require [clojure.test :refer :all]))
 
-(def test-data {(+ 1 2) 3, (* 1 2) 2})
+(def test-data {'(* 1 2) 2, '(+ 1 2) 3})
 
 (deftest
  autogen

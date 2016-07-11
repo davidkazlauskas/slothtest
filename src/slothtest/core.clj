@@ -27,7 +27,7 @@
 
 (defn- default-struct []
   ; TODO: no hardcoding
-  {:namespace `(ns ~(symbol (str *notestns* ".autogen_test"))
+  {:namespace `(~'ns ~(symbol (str *notestns* ".autogen_test"))
                  (:require [clojure.test :refer :all]))
    :curr-tests '{}
    :testdef `(~'deftest ~'autogen
@@ -63,16 +63,28 @@
 (defn- add-test-expr [the-map func the-val]
   (assoc-in the-map [:curr-tests func] the-val))
 
+(defn remove-test-expr [the-map func]
+  (assoc-in
+    the-map [:curr-tests]
+    (dissoc (:curr-tests the-map) func)))
+
 (defn- save-specification [expr result]
   (clojure.java.io/make-parents (test-path))
   (save-struct
     (add-test-expr (curr-test-struct) expr result)))
 
+(defn- drop-specification [expr]
+  (save-struct
+    (remove-test-expr (curr-test-struct) expr)))
+
 (defmacro save-spec [the-expression]
-  (save-specification the-expression (eval the-expression)))
+  (save-specification `'~the-expression (eval the-expression)))
 
 (defmacro expect-spec [the-expression result]
-  (save-specification the-expression result))
+  (save-specification `'~the-expression result))
+
+(defmacro remove-spec [the-expression]
+  (drop-specification `'~the-expression))
 
 (defmacro slothtest-ns [new-namespace]
   `(def ^:dynamic *notestns* ~new-namespace))
