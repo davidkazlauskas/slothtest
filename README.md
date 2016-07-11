@@ -9,6 +9,8 @@ Then you've found a perfect testing solution for clojure!
 We tend to do a lot of testing in clojure when we evaluate repl expressions.
 Now you have power to save your evaluated repl commands without doing anything.
 
+## Example
+
 Say, you want to ensure that (+ 1 2) is always 3 but you don't want to write test. How to do that?
 
 Evaluate expression:
@@ -43,6 +45,8 @@ wanted you could:
 
 If you evaluate (+ 1 2) list multiple times the last one will be saved.
 (+ 1 2) is saved as a simple list, therefore, has unique key in the hash map.
+
+## Namespaces
 
 Default test namespace is read from project.clj (as project name),
 however, it may be changed with:
