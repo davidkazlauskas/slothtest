@@ -66,28 +66,86 @@
 (defn- add-test-expr [the-map func the-val]
   (assoc-in the-map [:curr-tests func] the-val))
 
-(defn remove-test-expr [the-map func]
+(defn- remove-test-expr [the-map func]
   (assoc-in
     the-map [:curr-tests]
     (dissoc (:curr-tests the-map) func)))
+
+(defn- ns-resolve-list [expr]
+  (eval (read-string (str "`'" expr))))
 
 (defn- save-specification [expr result]
   (clojure.java.io/make-parents (test-path))
   (save-struct
     (add-test-expr (curr-test-struct) expr result)))
 
+; testing function namespace resolution
+(defn rjames [x]
+  (* 2 x))
+
 (defn- drop-specification [expr]
   (save-struct
     (remove-test-expr (curr-test-struct) expr)))
 
 (defmacro save-spec [the-expression]
-  (save-specification `'~the-expression `'~(eval the-expression)))
+  "Use this for simple evaluations with namespace resolution.
+  Like: (save-spec (+ 1 2 3))
+  "
+  (save-specification
+    (ns-resolve-list the-expression)
+    `'~(eval (eval (ns-resolve-list the-expression)))))
+
+(defmacro save-spec-sq
+  "Use this for syntax quoted blocks (if you need locals and stuff)."
+  [the-expression]
+  (save-specification
+    `'~(eval the-expression)
+    `'~(eval (eval the-expression))))
+
+(defmacro expand-spec-sq [the-expression]
+  {:expression `'~(eval the-expression)
+   :result `'~(eval (eval the-expression))})
+
+(defmacro expand-spec [the-expression]
+  {:expression (ns-resolve-list the-expression)
+   :result `~(eval (ns-resolve-list the-expression))})
 
 (defmacro expect-spec [the-expression result]
-  (save-specification `'~the-expression `'~result))
+  (save-specification (ns-resolve-list the-expression) `~result))
 
 (defmacro remove-spec [the-expression]
-  (drop-specification `'~the-expression))
+  (drop-specification (ns-resolve-list the-expression)))
 
 (defmacro slothtest-ns [new-namespace]
   `(def ^:dynamic *notestns* ~new-namespace))
+
+(comment
+  "Execute this test suite, generated sources should not be identical."
+
+  (do
+    (save-spec (+ 1 2 3 4))
+    (save-spec (rjames 2))
+
+    (save-spec (+ 1 2))
+    (save-spec (* 1 2))
+    (save-spec (/ 1 2))
+
+    (save-spec-sq
+      `(for [~'i [1 2 3]] (* 2 ~'i)))
+    )
+  )
+
+(comment
+  "Examples, evaluate for validation:"
+  (=
+   (expand-spec-sq
+    `(for [~'i [1 2 3]] (* 2 ~'i)))
+   {:expression
+      '(clojure.core/for [i [1 2 3]]
+        (clojure.core/* 2 i))
+    :result '(2 4 6)})
+
+  (=
+   (expand-spec (rjames 4))
+   {:expression '(slothtest.core/rjames 4)
+    :result '8}))
