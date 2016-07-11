@@ -17,7 +17,10 @@
 (defn structure-test [the-struct]
   {:namespace (first the-struct)
    :curr-tests (second the-struct)
-   :testdef (get the-struct 2)})
+   :testdef (second (rest the-struct))})
+
+(defn curr-test-struct []
+  (structure-test (read-string (str "(" (read-curr-test-src) ")"))))
 
 (defn default-struct []
   ; TODO: no hardcoding
