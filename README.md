@@ -1,5 +1,7 @@
 # slothtest
 
+[![Clojars Project](https://img.shields.io/clojars/v/slothtest.svg)](https://clojars.org/slothtest)
+
 Is this you?
 
 ![Sloth](http://pmdvod.nationalgeographic.com/NG_Video/742/275/140715-baby-sloth-orphanage-rescue-vin_640x360_304699971673.jpg)
