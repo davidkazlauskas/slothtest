@@ -57,6 +57,18 @@ If something got stale and you don't want to open test generation file remove it
 Symbols don't have to exist, so, if function is gone, you can just remove typing
 non-existant expression.
 
+## Syntax quoted tests
+
+If you need evaluate expression with local variables it could be done like so:
+
+```clojure
+(save-spec-sq
+  `(for [~'i [1 2 3]] (* 2 ~'i)))
+```
+
+This will save result as (2 4 6). However, ***avoid using # notation for
+locals as these will always be unique and will not be replaced on multiple evaluations.***
+
 ## Namespaces
 
 Default test namespace is read from project.clj (as project name),
