@@ -1,10 +1,10 @@
 (ns notest.core
   (:require [clojure.pprint :refer [write]]))
 
-(defn test-path []
+(defn- test-path []
   "./test/notest/autogen_test.clj")
 
-(defn read-curr-test-src []
+(defn- read-curr-test-src []
   (try
     ; TODO: no hardcoding
     (slurp (test-path))
@@ -15,12 +15,12 @@
 ; 1 - namespace declaration
 ; 2 - the map of sterf
 ; 3 - the the deftest sucka
-(defn structure-test [the-struct]
+(defn- structure-test [the-struct]
   {:namespace (first the-struct)
    :curr-tests (last (second the-struct))
    :testdef (last the-struct)})
 
-(defn default-struct []
+(defn- default-struct []
   ; TODO: no hardcoding
   {:namespace '(ns notest.autogen_test
                  (:require [clojure.test :refer :all]))
@@ -30,10 +30,10 @@
                  (~'doseq [[~'func ~'res] ~'test-data]
                    (~'is (~'= (~'eval ~'func) (~'eval ~'res))))))})
 
-(defn drop-nils-from-map [the-map]
+(defn- drop-nils-from-map [the-map]
   (into {} (filter second the-map)))
 
-(defn curr-test-struct []
+(defn- curr-test-struct []
   (merge
     (default-struct)
     (drop-nils-from-map
@@ -41,24 +41,24 @@
         (read-string
           (str "(" (read-curr-test-src) ")"))))))
 
-(defn ppr [the-struct]
+(defn- ppr [the-struct]
   (clojure.pprint/write
     the-struct :stream nil))
 
-(defn struct-to-source [the-struct]
+(defn- struct-to-source [the-struct]
   (clojure.string/join "\n\n"
                        [(ppr (:namespace the-struct))
                         (ppr `(def ~'test-data ~(:curr-tests the-struct)))
                         (ppr (:testdef the-struct))]))
 
-(defn save-struct [the-struct]
+(defn- save-struct [the-struct]
   (spit (test-path)
         (struct-to-source the-struct)))
 
-(defn add-test-expr [the-map func the-val]
+(defn- add-test-expr [the-map func the-val]
   (assoc-in the-map [:curr-tests func] the-val))
 
-(defn save-specification [expr result]
+(defn- save-specification [expr result]
   (save-struct
     (add-test-expr (curr-test-struct) expr result)))
 
@@ -67,8 +67,3 @@
 
 (defmacro expect-spec [the-expression result]
   (save-specification the-expression result))
-
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
