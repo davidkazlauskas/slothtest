@@ -1,12 +1,17 @@
 (ns notest.core
   (:require [clojure.pprint :refer [write]]))
 
+(defn- read-project-name-from-lein []
+  (str (second (read-string (slurp "./project.clj")))))
+
+(def ^:dynamic *notestns*
+  (read-project-name-from-lein))
+
 (defn- test-path []
-  "./test/notest/autogen_test.clj")
+  (str "./test/" *notestns* "/autogen_test.clj"))
 
 (defn- read-curr-test-src []
   (try
-    ; TODO: no hardcoding
     (slurp (test-path))
     (catch Exception e
       (println "Could not read test file:" e)
@@ -22,7 +27,7 @@
 
 (defn- default-struct []
   ; TODO: no hardcoding
-  {:namespace '(ns notest.autogen_test
+  {:namespace `(ns ~(symbol (str *notestns* ".autogen_test"))
                  (:require [clojure.test :refer :all]))
    :curr-tests '{}
    :testdef `(~'deftest ~'autogen
@@ -59,6 +64,7 @@
   (assoc-in the-map [:curr-tests func] the-val))
 
 (defn- save-specification [expr result]
+  (clojure.java.io/make-parents (test-path))
   (save-struct
     (add-test-expr (curr-test-struct) expr result)))
 
@@ -67,3 +73,6 @@
 
 (defmacro expect-spec [the-expression result]
   (save-specification the-expression result))
+
+(defmacro notest-ns [new-namespace]
+  `(def ^:dynamic *notestns* ~new-namespace))
