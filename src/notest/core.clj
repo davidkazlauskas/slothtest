@@ -28,10 +28,16 @@
                  (doseq [[func res] test-data]
                    (is (= (eval func) (eval res))))))})
 
+(defn drop-nils-from-map [the-map]
+  (into {} (filter second the-map)))
+
 (defn curr-test-struct []
   (merge
     (default-struct)
-    (structure-test (read-string (str "(" (read-curr-test-src) ")")))))
+    (drop-nils-from-map
+      (structure-test
+        (read-string
+          (str "(" (read-curr-test-src) ")"))))))
 
 (defn ppr [the-struct]
   (clojure.pprint/write
