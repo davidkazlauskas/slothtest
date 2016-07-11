@@ -1,7 +1,7 @@
 (ns notest.core)
 
 (defn test-path []
-  "./test/notest/notest_autogen_test.clj")
+  "./test/notest/autogen_test.clj")
 
 (defn read-curr-test-src []
   (try
