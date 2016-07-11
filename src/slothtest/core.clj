@@ -74,5 +74,5 @@
 (defmacro expect-spec [the-expression result]
   (save-specification the-expression result))
 
-(defmacro notest-ns [new-namespace]
+(defmacro slothtest-ns [new-namespace]
   `(def ^:dynamic *notestns* ~new-namespace))
