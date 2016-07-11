@@ -38,6 +38,27 @@
    :curr-tests '{}
    :testdef (gen-test-def {})})
 
+(defn- pull-namespaces [symb-list]
+  (cond
+    (nil? symb-list)
+      #{}
+    (or (vector? symb-list) (list? symb-list) (map? symb-list) (seq? symb-list))
+      (into #{} (reduce concat (map pull-namespaces symb-list)))
+    (symbol? symb-list)
+      (if-let [the-n (namespace symb-list)]
+        #{the-n}
+        #{})
+    :else
+      #{}))
+
+(defn- symbol-set [the-struct]
+  (into #{}
+   (reduce concat
+    (for [[the-key the-val] (:curr-tests the-struct)]
+      (-> #{}
+        (into (pull-namespaces the-key))
+        (into (pull-namespaces the-val)))))))
+
 (defn- drop-nils-from-map [the-map]
   (into {} (filter second the-map)))
 
