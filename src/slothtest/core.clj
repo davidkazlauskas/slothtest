@@ -30,7 +30,7 @@
        ~@(for [[func res] the-map]
           `(~'is (~'= ~(eval func) ~res))))))
 
-(defn default-ns-decl [reqlist]
+(defn- default-ns-decl [reqlist]
   `(~'ns ~(symbol (str *notestns* ".autogen_test"))
      (:require [clojure.test :refer :all]
                ~@reqlist)))
@@ -76,7 +76,7 @@
   (clojure.pprint/write
     the-struct :stream nil))
 
-(defn gen-ns-decl [the-struct]
+(defn- gen-ns-decl [the-struct]
   (default-ns-decl
     (map
       #(vector (symbol %))
