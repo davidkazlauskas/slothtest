@@ -36,7 +36,6 @@
                ~@reqlist)))
 
 (defn- default-struct []
-  ; TODO: no hardcoding
   {:curr-tests '{}
    :testdef (gen-test-def {})})
 
