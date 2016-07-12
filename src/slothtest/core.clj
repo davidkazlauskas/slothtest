@@ -149,7 +149,7 @@
   `(def ^:dynamic *notestns* ~new-namespace))
 
 (comment
-  "Execute this test suite, generated sources should not be identical."
+  "Execute this test suite, generated sources should be identical."
 
   (do
     (save-spec (+ 1 2 3 4))
