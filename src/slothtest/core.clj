@@ -7,8 +7,12 @@
 (def ^:dynamic *notestns*
   (read-project-name-from-lein))
 
+(defn- underscores-instead-dashes [the-str]
+  (.replaceAll the-str "\\-" "_"))
+
 (defn- test-path []
-  (str "./test/" *notestns* "/autogen_test.clj"))
+  (str "./test/" (underscores-instead-dashes *notestns*)
+       "/autogen_test.clj"))
 
 (defn- read-curr-test-src []
   (try
