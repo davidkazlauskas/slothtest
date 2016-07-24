@@ -34,13 +34,12 @@
        ~@(for [[func res] the-map]
           `(~'is (~'= ~(eval func) ~res))))))
 
-(defn default-ns-decl [reqlist]
+(defn- default-ns-decl [reqlist]
   `(~'ns ~(symbol (str *notestns* ".autogen_test"))
      (:require [clojure.test :refer :all]
                ~@reqlist)))
 
 (defn- default-struct []
-  ; TODO: no hardcoding
   {:curr-tests '{}
    :testdef (gen-test-def {})})
 
@@ -80,7 +79,7 @@
   (clojure.pprint/write
     the-struct :stream nil))
 
-(defn gen-ns-decl [the-struct]
+(defn- gen-ns-decl [the-struct]
   (default-ns-decl
     (map
       #(vector (symbol %))
@@ -153,7 +152,7 @@
   `(def ^:dynamic *notestns* ~new-namespace))
 
 (comment
-  "Execute this test suite, generated sources should not be identical."
+  "Execute this test suite, generated sources should be identical."
 
   (do
     (save-spec (+ 1 2 3 4))
