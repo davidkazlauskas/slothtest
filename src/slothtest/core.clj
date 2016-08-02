@@ -99,12 +99,22 @@
     {:metadata (assoc metadata :apiversion 2)
      :curr-tests (mapv v1-node-to-v2 curr-tests)}))
 
+(defn- two-nl-join [arr]
+  (clojure.string/join "\n\n" arr))
+
 (defn- struct-to-source-v1 [the-struct]
-  (clojure.string/join "\n\n"
-                       [(ppr (gen-ns-decl the-struct))
-                        (ppr `(def ~'metadata ~(:metadata the-struct)))
-                        (ppr `(def ~'test-data ~(:curr-tests the-struct)))
-                        (ppr (gen-test-def-v1 (:curr-tests the-struct)))]))
+  (two-nl-join
+    [(ppr (gen-ns-decl the-struct))
+     (ppr `(def ~'metadata ~(:metadata the-struct)))
+     (ppr `(def ~'test-data ~(:curr-tests the-struct)))
+     (ppr (gen-test-def-v1 (:curr-tests the-struct)))]))
+
+(defn- struct-to-source-v2 [the-struct]
+  (two-nl-join
+    [(ppr (gen-ns-decl the-struct))
+     (ppr `(def ~'metadata ~(:metadata the-struct)))
+     (ppr `(def ~'test-data ~(:curr-tests the-struct)))
+     (ppr (gen-test-def-v1 (:curr-tests the-struct)))]))
 
 (defn- struct-to-source [the-struct]
   (case (get-in the-struct [:metadata :apiversion])
