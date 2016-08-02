@@ -12,7 +12,11 @@
   '(clojure.core// 1 2) '1/2,
   '(clojure.core/for [i [1 2 3]] (clojure.core/* 2 i)) '(2 4 6),
   '(clojure.core/+ 1 2) '3,
-  '(clojure.core/+ 1 2 3) '6})
+  '(clojure.core/+ 1 2 3) '6,
+  '(slothtest.core/api-v1-to-v2
+    {:curr-tests {'(clojure.core/+ 1 2) 3}, :metadata {:apiversion 1}})
+  '{:metadata {:apiversion 2},
+    :curr-tests [{:expression (clojure.core/+ 1 2), :result 3}]}})
 
 (deftest
  autogen
@@ -24,4 +28,11 @@
   (is (= (clojure.core// 1 2) '1/2))
   (is (= (clojure.core/for [i [1 2 3]] (clojure.core/* 2 i)) '(2 4 6)))
   (is (= (clojure.core/+ 1 2) '3))
-  (is (= (clojure.core/+ 1 2 3) '6))))
+  (is (= (clojure.core/+ 1 2 3) '6))
+  (is
+   (=
+    (slothtest.core/api-v1-to-v2
+     {:curr-tests {'(clojure.core/+ 1 2) 3},
+      :metadata {:apiversion 1}})
+    '{:metadata {:apiversion 2},
+      :curr-tests [{:expression (clojure.core/+ 1 2), :result 3}]}))))
