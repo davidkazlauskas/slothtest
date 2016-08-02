@@ -25,7 +25,8 @@
 ; 2 - the map of sterf
 ; 3 - the the deftest sucka
 (defn- structure-test [the-struct]
-  {:curr-tests (last (second the-struct))
+  {:curr-tests (last (nth the-struct 2))
+   :metadata (last (second the-struct))
    :testdef (last the-struct)})
 
 (defn- gen-test-def [the-map]
@@ -88,6 +89,7 @@
 (defn- struct-to-source [the-struct]
   (clojure.string/join "\n\n"
                        [(ppr (gen-ns-decl the-struct))
+                        (ppr `(def ~'metadata ~(:metadata the-struct)))
                         (ppr `(def ~'test-data ~(:curr-tests the-struct)))
                         (ppr (gen-test-def (:curr-tests the-struct)))]))
 

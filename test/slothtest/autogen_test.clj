@@ -2,6 +2,8 @@
  slothtest.autogen_test
  (:require [clojure.test :refer :all] [slothtest.core] [clojure.core]))
 
+(def metadata {:apiversion 1})
+
 (def
  test-data
  {'(clojure.core/+ 1 2 3 4) '10,
@@ -9,7 +11,8 @@
   '(clojure.core/* 1 2) '2,
   '(clojure.core// 1 2) '1/2,
   '(clojure.core/for [i [1 2 3]] (clojure.core/* 2 i)) '(2 4 6),
-  '(clojure.core/+ 1 2) '3})
+  '(clojure.core/+ 1 2) '3,
+  '(clojure.core/+ 1 2 3) '6})
 
 (deftest
  autogen
@@ -20,4 +23,5 @@
   (is (= (clojure.core/* 1 2) '2))
   (is (= (clojure.core// 1 2) '1/2))
   (is (= (clojure.core/for [i [1 2 3]] (clojure.core/* 2 i)) '(2 4 6)))
-  (is (= (clojure.core/+ 1 2) '3))))
+  (is (= (clojure.core/+ 1 2) '3))
+  (is (= (clojure.core/+ 1 2 3) '6))))
