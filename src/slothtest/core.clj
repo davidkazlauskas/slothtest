@@ -358,7 +358,13 @@
   (save-struct
     (remove-test-expr (curr-test-struct) expr)))
 
-(defn- single-node-eval [the-node])
+(defn- node-eval-equality [expr expected])
+
+(defn- single-node-eval [the-node]
+  (case (:type the-node :equality)
+    :equality (node-eval-equality
+                (:expression the-node)
+                (:result the-node))))
 
 (defmacro save-spec [the-expression & extraargs]
   "Use this for simple evaluations with namespace resolution.
