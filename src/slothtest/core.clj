@@ -27,17 +27,17 @@
   (try
     (slurp (test-path))
     (catch Exception e
-      (println "Could not read test file:" e)
+      (println "Could not read test file:" (.getMessage e))
       "")))
 
 ; 1 - namespace declaration
 ; 2 - the map of sterf
 ; 3 - the the deftest sucka
 (defn- structure-test [the-struct]
-  (let [metadata (last (nth the-struct 1))
+  (let [metadata (or (last (second the-struct)) {:apiversion 2})
         ver (:apiversion metadata)]
     (case ver
-      1 {:curr-tests (last (nth the-struct 2))
+      1 {:curr-tests (last (second (rest the-struct)))
          :metadata metadata
          :testdef (last the-struct)}
       2 {:curr-tests (last (last the-struct))
