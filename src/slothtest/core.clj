@@ -177,6 +177,11 @@
 (defn- drop-nils-from-map [the-map]
   (into {} (filter second the-map)))
 
+(defn- api-v1-to-v2 [the-struct]
+  (let [{:keys [metadata curr-tests]} the-struct]
+    {:metadata (assoc metadata :apiversion 2)
+     :curr-tests (mapv v1-node-to-v2 curr-tests)}))
+
 (defn- upgrade-test-struct [the-struct]
   (case (get-in the-struct [:metadata :apiversion])
     1 (api-v1-to-v2 the-struct)
@@ -208,11 +213,6 @@
    ; :result - when type is equality
    ; :function - when type is function
    :result res})
-
-(defn- api-v1-to-v2 [the-struct]
-  (let [{:keys [metadata curr-tests]} the-struct]
-    {:metadata (assoc metadata :apiversion 2)
-     :curr-tests (mapv v1-node-to-v2 curr-tests)}))
 
 (defn- two-nl-join [arr]
   (clojure.string/join "\n\n" arr))
