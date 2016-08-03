@@ -10,6 +10,8 @@
 (def ^:dynamic *testfileclass*
   "autogen_test")
 
+(def ^:dynamic *breakage* nil)
+
 (defn- notestns []
   *notestns*)
 
