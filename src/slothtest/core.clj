@@ -260,10 +260,20 @@
   (spit (test-path)
         (struct-to-source-v2 the-struct)))
 
+(defn- ensure-correct-suite-name [the-name]
+  (if (not (re-matches #"^[-_a-zA-Z][-_a-zA-Z0-9]*$" the-name))
+    (throw (RuntimeException.
+             (str "Slothtest testsuite name must"
+                  " be a valid symbol name without"
+                  " namespace qualifiers and cannot"
+                  " start with a number. Invalid name: "
+                  "\"" the-name "\".")))))
+
 (defn- add-test-expr [the-map func the-val
                       & {:keys [suite description]
                          :or {suite nil
                               description nil}}]
+  (if suite (ensure-correct-suite-name suite))
   (if-let [idx (get-in the-map [:expr-index func])]
     (update-in the-map [:curr-tests idx]
                (fn [curr]
