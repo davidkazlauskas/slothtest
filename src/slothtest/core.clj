@@ -7,12 +7,21 @@
 (def ^:dynamic *notestns*
   (read-project-name-from-lein))
 
+(def ^:dynamic *testfileclass*
+  "autogen_test")
+
+(defn- notestns []
+  *notestns*)
+
+(defn- testfileclass []
+  *testfileclass*)
+
 (defn- underscores-instead-dashes [the-str]
   (.replaceAll the-str "\\-" "_"))
 
 (defn- test-path []
-  (str "./test/" (underscores-instead-dashes *notestns*)
-       "/autogen_test.clj"))
+  (str "./test/" (underscores-instead-dashes (notestns))
+       "/" (underscores-instead-dashes (testfileclass)) ".clj"))
 
 (defn- read-curr-test-src []
   (try
@@ -138,7 +147,7 @@
     (render-suites grouped)))
 
 (defn- default-ns-decl [reqlist]
-  `(~'ns ~(symbol (str *notestns* ".autogen_test"))
+  `(~'ns ~(symbol (str (notestns) "." (testfileclass)))
      (:require [clojure.test :refer :all]
                ~@reqlist)))
 
@@ -356,6 +365,9 @@
 
 (defmacro slothtest-ns [new-namespace]
   `(def ^:dynamic *notestns* ~new-namespace))
+
+(defmacro slothtest-class [new-class]
+  `(def ^:dynamic *testfileclass* ~new-class))
 
 (comment
   "Execute this test suite, generated sources should be identical."
