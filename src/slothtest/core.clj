@@ -25,7 +25,6 @@
 ; 2 - the map of sterf
 ; 3 - the the deftest sucka
 (defn- structure-test [the-struct]
-  (pp/pprint the-struct)
   (let [metadata (last (nth the-struct 1))
         ver (:apiversion metadata)]
     (println "ger" metadata)
