@@ -197,7 +197,7 @@
      :expr-index (build-node-index nodes)}))
 
 ; TODO: breakage viewer
-; TODO: add functions to different test specs and so on
+; TODO: option to write different file
 
 (defn- add-node-index [the-struct]
   (let [nodes (:curr-tests the-struct)
