@@ -27,7 +27,6 @@
 (defn- structure-test [the-struct]
   (let [metadata (last (nth the-struct 1))
         ver (:apiversion metadata)]
-    (println "ger" metadata)
     (case ver
       1 {:curr-tests (last (nth the-struct 2))
          :metadata metadata
@@ -241,12 +240,9 @@
      (ppr (gen-test-def-v2 (:curr-tests the-struct)))
      (ppr `(def ~'test-data ~(:curr-tests the-struct)))]))
 
-(defn- struct-to-source [the-struct]
-  (upgrade-test-struct the-struct))
-
 (defn- save-struct [the-struct]
   (spit (test-path)
-        (struct-to-source the-struct)))
+        (struct-to-source-v2 the-struct)))
 
 (defn- add-test-expr [the-map func the-val
                       & {:keys [suite description]
