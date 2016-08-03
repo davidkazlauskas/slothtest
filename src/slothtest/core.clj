@@ -358,6 +358,8 @@
   (save-struct
     (remove-test-expr (curr-test-struct) expr)))
 
+(defn- single-node-eval [the-node])
+
 (defmacro save-spec [the-expression & extraargs]
   "Use this for simple evaluations with namespace resolution.
   Like: (save-spec (+ 1 2 3))
@@ -396,6 +398,11 @@
 (defn slothtest-class [new-class]
   (ensure-correct-class-name new-class)
   (def ^:dynamic *testfileclass* new-class))
+
+(defn update-breakage []
+  (let [curr (:curr-tests (curr-test-struct))]
+    (def ^:dynamic *breakage*
+      (filterv some? (map single-node-eval curr)))))
 
 (comment
   "Execute this test suite, generated sources should be identical."
