@@ -358,7 +358,23 @@
   (save-struct
     (remove-test-expr (curr-test-struct) expr)))
 
-(defn- node-eval-equality [expr expected])
+(defn- eval-or-execpt [expr]
+  (try
+    [(eval expr) nil]
+    (catch Exception e
+      [nil e])))
+
+(defn- node-eval-equality [expr expected]
+  (let [[ev except] (eval-or-execpt expr)]
+    (if ev
+      (if (= ev expected)
+        nil
+        ; TODO: REPORT BREAKAGE WITH DIFF
+        )
+      {:type :exception
+       :expression expr
+       :expected expected
+       :exception except})))
 
 (defn- single-node-eval [the-node]
   (case (:type the-node :equality)
