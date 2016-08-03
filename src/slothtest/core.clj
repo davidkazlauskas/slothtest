@@ -50,7 +50,8 @@
     (try
       (spit (io/writer af) (ppr (sort-if-map-or-set a)))
       (spit (io/writer bf) (ppr (sort-if-map-or-set b)))
-      (println (:out (sh/sh "sh" "-c" (format (diff-cmd) can-a can-b))))
+      (let [res (sh/sh "sh" "-c" (format (diff-cmd) can-a can-b))]
+        (println (:out res)))
       (finally
         (.delete af)
         (.delete bf)))))
