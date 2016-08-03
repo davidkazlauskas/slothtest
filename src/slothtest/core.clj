@@ -389,15 +389,13 @@
 (defmacro remove-spec [the-expression]
   (drop-specification (ns-resolve-list the-expression)))
 
-(defmacro slothtest-ns [new-namespace]
-  (let [evval (eval new-namespace)]
-    (ensure-correct-namespace-name evval)
-    `(def ^:dynamic *notestns* ~evval)))
+(defn slothtest-ns [new-namespace]
+  (ensure-correct-namespace-name new-namespace)
+  (def ^:dynamic *notestns* new-namespace))
 
-(defmacro slothtest-class [new-class]
-  (let [evval (eval new-class)]
-    (ensure-correct-class-name evval)
-    `(def ^:dynamic *testfileclass* ~evval)))
+(defn slothtest-class [new-class]
+  (ensure-correct-class-name new-class)
+  (def ^:dynamic *testfileclass* new-class))
 
 (comment
   "Execute this test suite, generated sources should be identical."
