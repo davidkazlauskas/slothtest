@@ -25,9 +25,17 @@
 ; 2 - the map of sterf
 ; 3 - the the deftest sucka
 (defn- structure-test [the-struct]
-  {:curr-tests (last (nth the-struct 2))
-   :metadata (last (second the-struct))
-   :testdef (last the-struct)})
+  (pp/pprint the-struct)
+  (let [metadata (last (nth the-struct 1))
+        ver (:apiversion metadata)]
+    (println "ger" metadata)
+    (case ver
+      1 {:curr-tests (last (nth the-struct 2))
+         :metadata metadata
+         :testdef (last the-struct)}
+      2 {:curr-tests (last (last the-struct))
+         :metadata metadata
+         :testdef (butlast (drop 2 the-struct))})))
 
 (defn- gen-test-def-v1 [the-map]
   `(~'deftest ~'autogen
@@ -162,13 +170,19 @@
 (defn- drop-nils-from-map [the-map]
   (into {} (filter second the-map)))
 
+(defn- upgrade-test-struct [the-struct]
+  (case (get-in the-struct [:metadata :apiversion])
+    1 (api-v1-to-v2 the-struct)
+    2 the-struct))
+
 (defn- curr-test-struct []
-  (merge
-    (default-struct)
-    (drop-nils-from-map
-      (structure-test
-        (read-string
-          (str "(" (read-curr-test-src) ")"))))))
+  (upgrade-test-struct
+    (merge
+      (default-struct)
+      (drop-nils-from-map
+        (structure-test
+          (read-string
+            (str "(" (read-curr-test-src) ")")))))))
 
 (defn- ppr [the-struct]
   (clojure.pprint/write
