@@ -10,6 +10,9 @@
 (def ^:dynamic *testfileclass*
   "autogen_test")
 
+(def ^:dynamic *diffcmd*
+  (or (System/getenv "SLOTHTEST_DIFFCMD") "diff -y %1$s %2$s"))
+
 (def ^:dynamic *breakage* nil)
 
 (defn- notestns []
