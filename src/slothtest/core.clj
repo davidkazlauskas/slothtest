@@ -196,10 +196,32 @@
      :curr-tests nodes
      :expr-index (build-node-index nodes)}))
 
+(defn- add-node-index [the-struct]
+  (let [nodes (:curr-tests the-struct)
+        index (build-node-index nodes)]
+    (loop [curr-set #{}
+           nidx []
+           remnd (reverse nodes)] ; last one wins
+      (let [i (first remnd)
+            tail (rest remnd)
+            expr (:expression i)]
+       (if (nil? i)
+         (-> the-struct
+             (assoc :curr-tests (into [] (reverse nidx)))
+             (#(assoc % :expr-index
+                      (build-node-index (:curr-tests %)))))
+         (if (not (curr-set expr))
+           (recur (conj curr-set expr)
+                  (conj nidx i)
+                  tail)
+           (recur curr-set
+                  nidx
+                  tail)))))))
+
 (defn- upgrade-test-struct [the-struct]
   (case (get-in the-struct [:metadata :apiversion])
     1 (api-v1-to-v2 the-struct)
-    2 the-struct))
+    2 (add-node-index the-struct)))
 
 (defn- curr-test-struct []
   (upgrade-test-struct
