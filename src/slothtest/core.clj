@@ -168,10 +168,12 @@
 (defn- symbol-set [the-struct]
   (into #{}
    (reduce concat
-    (for [[the-key the-val] (:curr-tests the-struct)]
-      (-> #{}
-        (into (pull-namespaces the-key))
-        (into (pull-namespaces the-val)))))))
+    (for [i (:curr-tests the-struct)]
+      (let [{:keys [expression result function]} i]
+        (-> #{}
+          (into (pull-namespaces expression))
+          (into (pull-namespaces result))
+          (into (pull-namespaces function))))))))
 
 (defn- drop-nils-from-map [the-map]
   (into {} (filter second the-map)))
@@ -181,6 +183,7 @@
    ; additional fields (first default):
    ; :type [:equality :function]
    ; :result - when type is equality
+   ; :expression - expression used to gen result
    ; :function - when type is function
    ; :suite - the test suite this belongs to
    ; :description - the description
