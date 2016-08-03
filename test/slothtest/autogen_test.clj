@@ -20,8 +20,8 @@
       :metadata {:apiversion 1}})
     '{:metadata {:apiversion 2},
       :curr-tests [{:expression (clojure.core/+ 1 2), :result 3}],
-      :expr-index {(clojure.core/+ 1 2) 0}}))
-  (is (= (clojure.core/+ 1 2) '3))))
+      :expr-index {(clojure.core/+ 1 2) 0}})))
+ (testing "some rnd name" (is (= (clojure.core/+ 1 2) '3))))
 
 (deftest
  mclassen
@@ -44,4 +44,7 @@
    '{:metadata {:apiversion 2},
      :curr-tests [{:expression (clojure.core/+ 1 2), :result 3}],
      :expr-index {(clojure.core/+ 1 2) 0}}}
-  {:type :equality, :expression '(clojure.core/+ 1 2), :result '3}])
+  {:type :equality,
+   :expression '(clojure.core/+ 1 2),
+   :result '3,
+   :description "some rnd name"}])
