@@ -69,64 +69,43 @@
                          (+
                            (* 10000 (get ord-map suite))
                            (get-in grouped-suites [suite description])))
-                       < the-arr)
-        last-suite (atom nil)
-        last-description (atom nil)
-        the-nest (atom [])
-        lnest (fn [] (last @the-nest))
-        ldesc (fn [] (last (:desc (lnest))))]
+                       < the-arr)]
         ; layering: suites, descriptions
-    (doseq [i perfect-sort]
-      (let [{:keys [suite description
-                    expression result
-                    type]
-             :or {type :equality
-                  suite (defsuite)
-                  description (defdesc)}
-             :as node} i
-            lsname (:sname (lnest))]
-        (when (not= lsname suite)
-          (println "NAY, SUITE!")
-          (reset! the-nest
-                  (conj @the-nest {:sname suite :desc []}))
-          (println @the-nest)
-          )
-        (when (not= (:dname (ldesc)) description)
-          (println "NAY, DESC!" (ldesc))
-          (swap! the-nest
-                 (fn [old]
-                   (assoc-in old [(count old)
-                                  :desc
-                                  (count (:nodes (ldesc)))]
-                             {:dname description
-                              :nodes []}))))
-        ; TODO: rewrite this garbage some day when I care
-        (println "MCLASSEN")
-        (clojure.pprint/pprint
-          @the-nest
-          )
-        (println "MCLASSEN")
-        (swap! the-nest
-               (fn [old]
-                 (update-in old [(max 0 (dec (count old)))
+    (loop [therest perfect-sort acc []]
+      (let [curr (first therest)
+            tail (rest therest)]
+        (if curr
+          (let [{:keys [suite description]
+                 :or {suite (defsuite)
+                      description (defdesc)}
+                 :as the-node} curr]
+            (recur
+              tail
+             (-> acc
+              ((fn [this]
+                (if (= (test-suite curr) (:sname (last this)))
+                  this
+                  (conj this {:sname suite
+                              :desc []}))))
+              ((fn [this]
+                (if (= (testing-desc curr)
+                       (:dname (last (:desc (last this)))))
+                  this
+                  (update-in this [(dec (count this))
+                                   :desc]
+                             (fn [descnodes]
+                               (conj descnodes
+                                     {:dname description
+                                      :nodes []}))))))
+              ((fn [this]
+                (update-in this [(dec (count this))
                                  :desc
-                                 (max 0 (dec
-                                          (count
-                                            (:nodes (ldesc)))))]
-                            (fn [curr]
-                              (println "curr" curr suite)
-                              (update curr :nodes
-                                (fn [cnode]
-                                  (println "cnode" cnode description)
-                                  (conj cnode node)))))))
-        (clojure.pprint/pprint
-          @the-nest
-          )
-        (println "HOOHIE")
-        (when (and (= type :function) result)
-          ; TODO: not implemented yet
-          )))
-    @the-nest))
+                                 (dec (count (:desc (last this))))]
+                           (fn [toup]
+                             (assoc toup
+                                    :nodes
+                                    (conj (:nodes toup) the-node)))))))))
+          acc)))))
 
 (defn render-testing-node [inner-arr]
   (for [i inner-arr]
