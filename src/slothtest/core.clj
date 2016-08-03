@@ -225,10 +225,11 @@
 
 (defn- struct-to-source-v2 [the-struct]
   (two-nl-join
-    [(ppr (gen-ns-decl the-struct))
-     (ppr `(def ~'metadata ~(:metadata the-struct)))
-     (ppr (gen-test-def-v2 (:curr-tests the-struct)))
-     (ppr `(def ~'test-data ~(:curr-tests the-struct)))]))
+    (concat
+      [(ppr (gen-ns-decl the-struct))
+       (ppr `(def ~'metadata ~(:metadata the-struct)))]
+      (map ppr (gen-test-def-v2 (:curr-tests the-struct)))
+      [(ppr `(def ~'test-data ~(:curr-tests the-struct)))])))
 
 (defn- save-struct [the-struct]
   (spit (test-path)
