@@ -233,9 +233,7 @@
      (ppr `(def ~'test-data ~(:curr-tests the-struct)))]))
 
 (defn- struct-to-source [the-struct]
-  (case (get-in the-struct [:metadata :apiversion])
-    1 (struct-to-source-v1 the-struct) ; TODO: convert to v2
-    2 (struct-to-source-v2 the-struct)))
+  (upgrade-test-struct the-struct))
 
 (defn- save-struct [the-struct]
   (spit (test-path)
