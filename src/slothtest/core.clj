@@ -269,12 +269,36 @@
   (spit (test-path)
         (struct-to-source-v2 the-struct)))
 
+(defn- generic-symb-check [the-name]
+  (some? (re-matches #"^[-_a-zA-Z][-_a-zA-Z0-9]*$" the-name)))
+
+(defn generic-symb-with-dots-check [the-name]
+  (some? (re-matches #"^[-_a-zA-Z][-_a-zA-Z0-9\.]*$" the-name)))
+
 (defn- ensure-correct-suite-name [the-name]
-  (if (not (re-matches #"^[-_a-zA-Z][-_a-zA-Z0-9]*$" the-name))
+  (if (not (generic-symb-check the-name))
     (throw (RuntimeException.
              (str "Slothtest testsuite name must"
                   " be a valid symbol name without"
                   " namespace qualifiers and cannot"
+                  " start with a number. Invalid name: "
+                  "\"" the-name "\".")))))
+
+(defn- ensure-correct-class-name [the-name]
+  (if (not (generic-symb-check the-name))
+    (throw (RuntimeException.
+             (str "Slothtest class name must"
+                  " be a valid symbol name without"
+                  " namespace qualifiers and cannot"
+                  " start with a number. Invalid name: "
+                  "\"" the-name "\".")))))
+
+(defn- ensure-correct-namespace-name [the-name]
+  (if (not (generic-symb-with-dots-check the-name))
+    (throw (RuntimeException.
+             (str "Slothtest namespace name must"
+                  " be a valid symbol name with optional"
+                  " periods and cannot"
                   " start with a number. Invalid name: "
                   "\"" the-name "\".")))))
 
@@ -364,10 +388,14 @@
   (drop-specification (ns-resolve-list the-expression)))
 
 (defmacro slothtest-ns [new-namespace]
-  `(def ^:dynamic *notestns* ~new-namespace))
+  (let [evval (eval new-namespace)]
+    (ensure-correct-namespace-name evval)
+    `(def ^:dynamic *notestns* ~evval)))
 
 (defmacro slothtest-class [new-class]
-  `(def ^:dynamic *testfileclass* ~new-class))
+  (let [evval (eval new-class)]
+    (ensure-correct-class-name evval)
+    `(def ^:dynamic *testfileclass* ~evval)))
 
 (comment
   "Execute this test suite, generated sources should be identical."
