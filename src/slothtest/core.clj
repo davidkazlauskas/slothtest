@@ -1,5 +1,8 @@
 (ns slothtest.core
-  (:require [clojure.pprint :refer [write]]))
+  (:require [clojure.pprint :refer [write]]
+            [clojure.java.shell :as sh]
+            [clojure.java.io :as io])
+  (:import [java.io File]))
 
 (defn- read-project-name-from-lein []
   (str (second (read-string (slurp "./project.clj")))))
@@ -11,7 +14,7 @@
   "autogen_test")
 
 (def ^:dynamic *diffcmd*
-  (or (System/getenv "SLOTHTEST_DIFFCMD") "diff -y %1$s %2$s"))
+  (or (System/getenv "SLOTHTEST_DIFFCMD") "diff -y '%1$s' '%2$s'"))
 
 (def ^:dynamic *breakage* nil)
 
@@ -20,6 +23,37 @@
 
 (defn- testfileclass []
   *testfileclass*)
+
+(defn- temp-file []
+  (File/createTempFile "sloth-diff" ".txt"))
+
+(defn- diff-cmd []
+  *diffcmd*)
+
+(defn- ppr [the-struct]
+  (clojure.pprint/write
+    the-struct :stream nil))
+
+(defn- sort-if-map-or-set [dat]
+  (cond (map? dat)
+        (into (sorted-map) dat)
+        (set? dat)
+        (into (sorted-set) dat)
+        :else
+        dat))
+
+(defn- diff-two-structs [a b]
+  (let [af (temp-file)
+        bf (temp-file)
+        can-a (.getCanonicalPath af)
+        can-b (.getCanonicalPath bf)]
+    (try
+      (spit (io/writer af) (ppr (sort-if-map-or-set a)))
+      (spit (io/writer bf) (ppr (sort-if-map-or-set b)))
+      (println (:out (sh/sh "sh" "-c" (format (diff-cmd) can-a can-b))))
+      (finally
+        (.delete af)
+        (.delete bf)))))
 
 (defn- underscores-instead-dashes [the-str]
   (.replaceAll the-str "\\-" "_"))
@@ -248,10 +282,6 @@
         (structure-test
           (read-string
             (str "(" (read-curr-test-src) ")")))))))
-
-(defn- ppr [the-struct]
-  (clojure.pprint/write
-    the-struct :stream nil))
 
 (defn- gen-ns-decl [the-struct]
   (default-ns-decl
