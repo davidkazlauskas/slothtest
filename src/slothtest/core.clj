@@ -271,12 +271,16 @@
                      (assoc :expression func)
                      (assoc :result the-val)
                      ((fn [now]
-                        (if (and suite (not= suite (defsuite)))
-                          (assoc now :suite suite)
+                        (if suite
+                          (if (= suite (defsuite))
+                            (dissoc now :suite)
+                            (assoc now :suite suite))
                           now)))
                      ((fn [now]
-                        (if (and description (not= description (defdesc)))
-                          (assoc now :description description)
+                        (if description
+                          (if (= description (defdesc))
+                            (dissoc now :description)
+                            (assoc now :description description))
                           now))))))
     (update-in the-map [:curr-tests]
                (fn [currv]
