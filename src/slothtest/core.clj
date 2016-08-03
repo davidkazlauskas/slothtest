@@ -123,13 +123,13 @@
       :function ; TODO: is this correct?
       `(~'is (~(:function i) ~(eval (:expression i)))))))
 
-(defn render-testing-node [inner-arr]
+(defn- render-testing-node [inner-arr]
   (for [i inner-arr]
     `(~'testing
        ~(:dname i)
        ~@(render-is-clauses (:nodes i)))))
 
-(defn render-suites [the-arr]
+(defn- render-suites [the-arr]
   (for [i the-arr]
     `(~'deftest ~(symbol (:sname i))
        ~@(render-testing-node (:desc i)))))
