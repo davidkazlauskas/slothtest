@@ -306,7 +306,7 @@
 (defn- generic-symb-check [the-name]
   (some? (re-matches #"^[-_a-zA-Z][-_a-zA-Z0-9]*$" the-name)))
 
-(defn generic-symb-with-dots-check [the-name]
+(defn- generic-symb-with-dots-check [the-name]
   (some? (re-matches #"^[-_a-zA-Z][-_a-zA-Z0-9\.]*$" the-name)))
 
 (defn- ensure-correct-suite-name [the-name]
