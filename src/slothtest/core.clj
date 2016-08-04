@@ -492,6 +492,8 @@
 (defn next-breakage []
   (last @*breakage*))
 
+; TODO: document breakage viewer
+
 (defn diff-next-breakage []
   (if-let [curr (last @*breakage*)]
     (do
