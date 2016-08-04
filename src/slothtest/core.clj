@@ -50,8 +50,9 @@
     (try
       (spit (io/writer af) (ppr (sort-if-map-or-set a)))
       (spit (io/writer bf) (ppr (sort-if-map-or-set b)))
-      (let [res (sh/sh "sh" "-c" (format (diff-cmd) can-a can-b))]
-        (println (:out res)))
+      (let [res (sh/sh "sh" "-c" (format (diff-cmd) can-a can-b))
+            out (:out res)]
+        (println res))
       (finally
         (.delete af)
         (.delete bf)))))
@@ -404,7 +405,7 @@
       (if (= ev expected)
         nil
         ; TODO: REPORT BREAKAGE WITH DIFF
-        )
+        (diff-two-structs expected ev))
       {:type :exception
        :expression expr
        :expected expected
