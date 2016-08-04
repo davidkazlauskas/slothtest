@@ -393,7 +393,7 @@
 
 ; testing function namespace resolution
 (defn rjames [x]
-  (* 2 x))
+  (* 3 x))
 
 (defn- drop-specification [expr]
   (save-struct
@@ -505,6 +505,15 @@
         (diff-two-structs
           (:expected curr)
           (:actual curr))))))
+
+(defn next-expression []
+  (if-let [curr (last @*breakage*)]
+    (do
+      (if (not= (:type curr) :equality)
+        (throw (RuntimeException.
+                 (str "Only equality breakage expressions"
+                      " can be viewed."))))
+      (println (:expression curr)))))
 
 (defn approve-next-breakage []
   (if-let [curr (last @*breakage*)]
