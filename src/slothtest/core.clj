@@ -493,6 +493,7 @@
   (last @*breakage*))
 
 ; TODO: document breakage viewer
+; TODO: make function save specs
 
 (defn diff-next-breakage []
   (if-let [curr (last @*breakage*)]
@@ -513,7 +514,7 @@
         (throw (RuntimeException.
                  (str "Only equality breakage expressions"
                       " can be viewed."))))
-      (println (:expression curr)))))
+      (clojure.pprint/pprint (:expression curr)))))
 
 (defn approve-next-breakage []
   (if-let [curr (last @*breakage*)]
