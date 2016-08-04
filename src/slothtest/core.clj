@@ -52,7 +52,7 @@
       (spit (io/writer bf) (ppr (sort-if-map-or-set b)))
       (let [res (sh/sh "sh" "-c" (format (diff-cmd) can-a can-b))
             out (:out res)]
-        (println res))
+        out)
       (finally
         (.delete af)
         (.delete bf)))))
@@ -399,13 +399,21 @@
     (catch Exception e
       [nil e])))
 
+(defn- wrap-struct-diff-error [expr expected ev]
+  {:type :breakage
+   :expression expr
+   :expected expected
+   :actual ev})
+
 (defn- node-eval-equality [expr expected]
   (let [[ev except] (eval-or-execpt expr)]
     (if ev
       (if (= ev expected)
         nil
         ; TODO: REPORT BREAKAGE WITH DIFF
-        (diff-two-structs expected ev))
+        (wrap-struct-diff-error
+          expr
+          expected ev))
       {:type :exception
        :expression expr
        :expected expected
@@ -457,9 +465,10 @@
   (def ^:dynamic *testfileclass* new-class))
 
 (defn update-breakage []
-  (let [curr (:curr-tests (curr-test-struct))]
-    (def ^:dynamic *breakage*
-      (filterv some? (map single-node-eval curr)))))
+  (let [curr (:curr-tests (curr-test-struct))
+        breakage (filterv some? (map single-node-eval curr))]
+    (def ^:dynamic *breakage* breakage)
+    (count breakage)))
 
 (comment
   "Execute this test suite, generated sources should be identical."
