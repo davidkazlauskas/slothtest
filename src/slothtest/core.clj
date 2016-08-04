@@ -339,6 +339,15 @@
                   " start with a number. Invalid name: "
                   "\"" the-name "\".")))))
 
+(defn- update-node [the-map new-node]
+  (if-let [idx (get-in
+                 the-map
+                 [:expr-index (:expression the-map)])]
+    (assoc-in the-map [:curr-tests idx] new-node)
+    (update-in the-map [:curr-tests]
+               (fn [the-vec]
+                 (conj the-vec new-node)))))
+
 (defn- add-test-expr [the-map func the-val
                       & {:keys [suite description]
                          :or {suite nil
@@ -399,29 +408,34 @@
     (catch Exception e
       [nil e])))
 
-(defn- wrap-struct-diff-error [expr expected ev]
+(defn- wrap-struct-diff-error [orig expr expected ev]
   {:type :breakage
+   :orig orig
    :expression expr
    :expected expected
    :actual ev})
 
-(defn- node-eval-equality [expr expected]
-  (let [[ev except] (eval-or-execpt expr)]
+(defn- node-eval-equality [orig expr expected]
+  ; drop quotes with two level eval
+  (let [[ev except] (eval-or-execpt (eval expr))
+        evex (eval expected)]
     (if ev
-      (if (= ev expected)
+      (if (= ev evex)
         nil
         ; TODO: REPORT BREAKAGE WITH DIFF
         (wrap-struct-diff-error
-          expr
-          expected ev))
+          orig expr
+          evex ev))
       {:type :exception
+       :orig orig
        :expression expr
-       :expected expected
+       :expected evex
        :exception except})))
 
 (defn- single-node-eval [the-node]
   (case (:type the-node :equality)
     :equality (node-eval-equality
+                the-node
                 (:expression the-node)
                 (:result the-node))))
 
@@ -466,9 +480,38 @@
 
 (defn update-breakage []
   (let [curr (:curr-tests (curr-test-struct))
-        breakage (filterv some? (map single-node-eval curr))]
-    (def ^:dynamic *breakage* breakage)
+        ; we'll be popping off the end
+        breakage (filterv some? (reverse (map single-node-eval curr)))]
+    (def ^:dynamic *breakage* (atom breakage))
     (count breakage)))
+
+(defn skip-next-breakage []
+  (swap! *breakage*
+         (fn [curr]
+           (pop curr)))
+  (count @*breakage*))
+
+(defn diff-next-breakage []
+  (let [curr (last @*breakage*)]
+    (if (not= (:type curr) :equality)
+      (throw (RuntimeException.
+               (str "Diff can be only applied"
+                    " to equality type of test."))))
+    (diff-two-structs
+      (:expected curr)
+      (:actual curr))))
+
+(defn approve-next-breakage []
+  (let [curr (last @*breakage*)]
+    (if (not= (:type curr) :equality)
+      (throw (RuntimeException.
+               (str "Only equality breakage may"
+                    " be approved."))))
+    (save-struct
+      (update-node (curr-test-struct)
+        (assoc
+          (:orig curr)
+          :result `'~(:actual curr))))))
 
 (comment
   "Execute this test suite, generated sources should be identical."
