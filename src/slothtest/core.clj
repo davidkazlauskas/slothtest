@@ -339,7 +339,7 @@
 (defn- update-node [the-map new-node]
   (if-let [idx (get-in
                  the-map
-                 [:expr-index (:expression the-map)])]
+                 [:expr-index (:expression new-node)])]
     (assoc-in the-map [:curr-tests idx] new-node)
     (update-in the-map [:curr-tests]
                (fn [the-vec]
@@ -406,7 +406,7 @@
       [nil e])))
 
 (defn- wrap-struct-diff-error [orig expr expected ev]
-  {:type :breakage
+  {:type :equality
    :orig orig
    :expression expr
    :expected expected
@@ -485,30 +485,39 @@
 (defn skip-next-breakage []
   (swap! *breakage*
          (fn [curr]
-           (pop curr)))
+           (if (not (empty? curr))
+            (pop curr))))
   (count @*breakage*))
 
+(defn next-breakage []
+  (last @*breakage*))
+
 (defn diff-next-breakage []
-  (let [curr (last @*breakage*)]
-    (if (not= (:type curr) :equality)
-      (throw (RuntimeException.
-               (str "Diff can be only applied"
-                    " to equality type of test."))))
-    (diff-two-structs
-      (:expected curr)
-      (:actual curr))))
+  (if-let [curr (last @*breakage*)]
+    (do
+      (if (not= (:type curr) :equality)
+        (throw (RuntimeException.
+                 (str "Diff can be only applied"
+                      " to equality type of test."))))
+      (println
+        (diff-two-structs
+          (:expected curr)
+          (:actual curr))))))
 
 (defn approve-next-breakage []
-  (let [curr (last @*breakage*)]
-    (if (not= (:type curr) :equality)
-      (throw (RuntimeException.
-               (str "Only equality breakage may"
-                    " be approved."))))
-    (save-struct
-      (update-node (curr-test-struct)
-        (assoc
-          (:orig curr)
-          :result `'~(:actual curr))))))
+  (if-let [curr (last @*breakage*)]
+    (do
+      (if (not= (:type curr) :equality)
+        (throw (RuntimeException.
+                 (str "Only equality breakage may"
+                      " be approved."))))
+      (save-struct
+        (update-node (curr-test-struct)
+          (assoc
+            (:orig curr)
+            :result `'~(:actual curr))))
+      (skip-next-breakage))
+    0))
 
 (comment
   "Execute this test suite, generated sources should be identical."
