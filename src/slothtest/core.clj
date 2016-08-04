@@ -246,9 +246,6 @@
      :curr-tests nodes
      :expr-index (build-node-index nodes)}))
 
-; TODO: breakage viewer
-; TODO: option to write different file
-
 (defn- add-node-index [the-struct]
   (let [nodes (:curr-tests the-struct)
         index (build-node-index nodes)]
