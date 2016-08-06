@@ -128,9 +128,9 @@ To get all the data about next breakage call:
 ```
 
 Say you have decided if breakage is appropriate. Now you have three choices:
-1. Skip breakage - will skip it, and will move to the next one, it will appear again calling update-breakage
-2. Approve breakage - agree with it and update the test result
-3. Delete breakage - delete the entire test that broke
+- 1. Skip breakage - will skip it, and will move to the next one, it will appear again calling update-breakage
+- 2. Approve breakage - agree with it and update the test result
+- 3. Delete breakage - delete the entire test that broke
 
 Skip:
 ```clojure
