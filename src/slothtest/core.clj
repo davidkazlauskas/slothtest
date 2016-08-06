@@ -345,6 +345,18 @@
                (fn [the-vec]
                  (conj the-vec new-node)))))
 
+(defn- delete-node [the-map to-delete]
+  (if-let [idx (get-in
+                 the-map
+                 [:expr-index (:expression to-delete)])]
+    (update-in the-map [:curr-tests]
+               (fn [the-vec]
+                 (->> the-vec
+                      (map-indexed (fn [idxc sec]
+                                (if (not= idx idxc)
+                                  sec)))
+                      (filterv some?))))))
+
 (defn- add-test-expr [the-map func the-val
                       & {:keys [suite description]
                          :or {suite nil
@@ -516,6 +528,19 @@
                  (str "Only equality breakage expressions"
                       " can be viewed."))))
       (clojure.pprint/pprint (:expression curr)))))
+
+(defn delete-next-breakage []
+  (if-let [curr (last @*breakage*)]
+    (do
+      (if (not= (:type curr) :equality)
+        (throw (RuntimeException.
+                 (str "Only equality breakage may"
+                      " be approved."))))
+      (save-struct
+        (delete-node (curr-test-struct)
+          (:orig curr)))
+      (skip-next-breakage))
+    0))
 
 (defn approve-next-breakage []
   (if-let [curr (last @*breakage*)]
