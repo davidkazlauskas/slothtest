@@ -79,4 +79,72 @@ however, it may be changed with:
 (slothtest-ns somenamespace)
 ```
 
+## Test class name
+
+Default test source name is "autogen_test", this
+can be changed with
+```clojure
+(slothtest-class someclassname)
+```
+
+### Breakage viewer
+
+Starting with slothtest 0.3.0 breakage viewer
+is added. Say you break some tests and want
+to review where. You don't have to leave repl.
+You can just run:
+```clojure
+(update-breakage)
+```
+
+If repl returns anything above 0, some breakage was introduced.
+
+To see the next expression of what broke call:
+```clojure
+(next-expression)
+```
+
+You can diff it with:
+```clojure
+(diff-next-breakage)
+```
+
+This calls external diff command to differentiate output as text.
+Default diff command might be replaced with environment variable:
+```sh
+# default
+export SLOTHTEST_DIFFCMD="diff -y '%1$s' '%2$s'"
+
+# using python cdiff tool, copy temporary files as sloth.a and sloth.b and view it as colored diff
+# then you can watch sloth.diff in the next window seeing colored output.
+# BY THE WAY, If someone knows how to make vim-fireplace plugin show ansi-colored text in evaluation output
+# please tell me.
+export SLOTHTEST_DIFFCMD="cp '%1\$s' ./sloth.a && cp '%2\$s' ./sloth.b && diff -u '%1\$s' '%2\$s' | cdiff -c always -s -w 50 | tee ./sloth.diff"
+```
+
+To get all the data about next breakage call:
+```clojure
+(next-breakage)
+```
+
+Say you have decided if breakage is appropriate. Now you have three choices:
+1. Skip breakage - will skip it, and will move to the next one, it will appear again calling update-breakage
+2. Approve breakage - agree with it and update the test result
+3. Delete breakage - delete the entire test that broke
+
+Skip:
+```clojure
+(skip-next-breakage)
+```
+
+Approve:
+```clojure
+(approve-next-breakage)
+```
+
+Delete:
+```clojure
+(delete-next-breakage)
+```
+
 Happy time spent developing instead of writing tedious repetitive tests!

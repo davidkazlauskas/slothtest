@@ -504,7 +504,6 @@
 (defn next-breakage []
   (last @*breakage*))
 
-; TODO: document breakage viewer
 ; TODO: make function save specs
 ; TODO: remove broken test
 
