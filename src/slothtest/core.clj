@@ -505,7 +505,6 @@
   (last @*breakage*))
 
 ; TODO: make function save specs
-; TODO: remove broken test
 
 (defn diff-next-breakage []
   (if-let [curr (last @*breakage*)]
