@@ -473,8 +473,9 @@
   {:expression (ns-resolve-list the-expression)
    :result `~(eval (ns-resolve-list the-expression))})
 
-(defmacro expect-spec [the-expression result]
-  (save-specification (ns-resolve-list the-expression) `'~result))
+(defmacro expect-spec [the-expression result & extraargs]
+  (save-specification (ns-resolve-list the-expression) `'~result
+                      (map eval extraargs)))
 
 (defmacro remove-spec [the-expression]
   (drop-specification (ns-resolve-list the-expression)))
@@ -505,6 +506,7 @@
   (last @*breakage*))
 
 ; TODO: make function save specs
+; TODO: expect breakage based on and perform action
 
 (defn diff-next-breakage []
   (if-let [curr (last @*breakage*)]
