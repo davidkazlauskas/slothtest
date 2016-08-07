@@ -417,8 +417,22 @@
       :deleted)
     :notfound))
 
+(defn- require-expression-dependencies [expr]
+  (cond
+    (symbol? expr)
+      (let [namspc (symbol (namespace expr))]
+        (require namspc))
+    (or (list? expr) (vector? expr) (set? expr))
+      (doseq [i expr]
+        (require-expression-dependencies i))
+    (map? expr)
+      (doseq [[k v] expr]
+        (require-expression-dependencies k)
+        (require-expression-dependencies v))))
+
 (defn- eval-or-execpt [expr]
   (try
+    (require-expression-dependencies expr)
     [(eval expr) nil]
     (catch Exception e
       [nil e])))
