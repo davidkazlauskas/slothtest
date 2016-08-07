@@ -547,10 +547,6 @@
 (defn delete-next-breakage []
   (if-let [curr (last @*breakage*)]
     (do
-      (if (not= (:type curr) :equality)
-        (throw (RuntimeException.
-                 (str "Only equality breakage may"
-                      " be approved."))))
       (save-struct
         (delete-node (curr-test-struct)
           (get-in curr [:orig :expression])))
