@@ -348,7 +348,7 @@
 (defn- delete-node [the-map to-delete]
   (if-let [idx (get-in
                  the-map
-                 [:expr-index (:expression to-delete)])]
+                 [:expr-index to-delete])]
     (update-in the-map [:curr-tests]
                (fn [the-vec]
                  (->> the-vec
@@ -363,34 +363,34 @@
                               description nil}}]
   (if suite (ensure-correct-suite-name suite))
   (if-let [idx (get-in the-map [:expr-index func])]
-    (update-in the-map [:curr-tests idx]
-               (fn [curr]
-                 (-> curr
-                     (assoc :expression func)
-                     (assoc :result the-val)
-                     ((fn [now]
-                        (if suite
-                          (if (= suite (defsuite))
-                            (dissoc now :suite)
-                            (assoc now :suite suite))
-                          now)))
-                     ((fn [now]
-                        (if description
-                          (if (= description (defdesc))
-                            (dissoc now :description)
-                            (assoc now :description description))
-                          now))))))
-    (update-in the-map [:curr-tests]
-               (fn [currv]
-                 (conj currv
-                       {:type :equality
-                        :expression func
-                        :result the-val})))))
+    [:updated
+      (update-in the-map [:curr-tests idx]
+                 (fn [curr]
+                   (-> curr
+                       (assoc :expression func)
+                       (assoc :result the-val)
+                       ((fn [now]
+                          (if suite
+                            (if (= suite (defsuite))
+                              (dissoc now :suite)
+                              (assoc now :suite suite))
+                            now)))
+                       ((fn [now]
+                          (if description
+                            (if (= description (defdesc))
+                              (dissoc now :description)
+                              (assoc now :description description))
+                            now))))))]
+    [:added
+      (update-in the-map [:curr-tests]
+                (fn [currv]
+                  (conj currv
+                        {:type :equality
+                         :expression func
+                         :result the-val})))]))
 
 (defn- remove-test-expr [the-map func]
-  (assoc-in
-    the-map [:curr-tests]
-    (dissoc (:curr-tests the-map) func)))
+  (delete-node the-map func))
 
 (defn- ns-resolve-list [expr]
   (eval (read-string (str "`'" expr))))
@@ -398,18 +398,23 @@
 (defn- save-specification
   [expr result extra-args]
   (clojure.java.io/make-parents (test-path))
-  (save-struct
-    (apply
-      add-test-expr (upgrade-test-struct (curr-test-struct))
-                    expr result extra-args)))
+  (let [[add-type add-res]
+          (apply
+            add-test-expr (upgrade-test-struct (curr-test-struct))
+                          expr result extra-args)]
+   (save-struct add-res)
+   add-type))
 
 ; testing function namespace resolution
 (defn rjames [x]
   (* 3 x))
 
 (defn- drop-specification [expr]
-  (save-struct
-    (remove-test-expr (curr-test-struct) expr)))
+  (if-let [removal-res (remove-test-expr (curr-test-struct) expr)]
+    (do
+      (save-struct removal-res)
+      :deleted)
+    :notfound))
 
 (defn- eval-or-execpt [expr]
   (try
@@ -538,7 +543,7 @@
                       " be approved."))))
       (save-struct
         (delete-node (curr-test-struct)
-          (:orig curr)))
+          (get-in curr [:orig :expression])))
       (skip-next-breakage))
     0))
 
