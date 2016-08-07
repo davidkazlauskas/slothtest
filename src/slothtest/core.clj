@@ -157,11 +157,30 @@
                                     (conj (:nodes toup) the-node)))))))))
           acc)))))
 
+(defn- sort-result-expr [the-expr]
+  ; better for diffing
+  (cond
+    (or (list? the-expr) (seq? the-expr))
+      (doall
+        (map sort-result-expr the-expr))
+    (vector? the-expr)
+      (mapv sort-result-expr the-expr)
+    (map? the-expr)
+      (into (sorted-map)
+            (map
+              (fn [[k v]] [k (sort-result-expr v)])
+              the-expr))
+    (set? the-expr)
+      (into (sorted-set)
+            (map sort-result-expr the-expr))
+    :else the-expr))
+
 (defn- render-is-clauses [the-nodes]
   (for [i the-nodes]
     (case (:type i :equality)
       :equality
-      `(~'is (~'= ~(eval (:expression i)) ~(:result i)))
+      `(~'is (~'= ~(sort-result-expr (eval (:expression i)))
+                  ~(sort-result-expr (:result i))))
       :function ; TODO: is this correct?
       `(~'is (~(:function i) ~(eval (:expression i)))))))
 
@@ -298,7 +317,7 @@
       [(ppr (gen-ns-decl the-struct))
        (ppr `(def ~'metadata ~(:metadata the-struct)))]
       (map ppr (gen-test-def-v2 (:curr-tests the-struct)))
-      [(ppr `(def ~'test-data ~(:curr-tests the-struct)))])))
+      [(ppr `(def ~'test-data ~(sort-result-expr (:curr-tests the-struct))))])))
 
 (defn- save-struct [the-struct]
   (spit (test-path)
