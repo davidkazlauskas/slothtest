@@ -231,6 +231,7 @@
    ; :function - when type is function
    ; :suite - the test suite this belongs to
    ; :description - the description
+   :type :equality
    :result res})
 
 (defn- build-node-index [node-arr]
