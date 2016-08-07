@@ -554,8 +554,8 @@
         (= btype :equality)
           (println
             (diff-two-structs
-              (:expected curr)
-              (:actual curr)))
+              (sort-result-expr (:expected curr))
+              (sort-result-expr (:actual curr))))
         (= btype :exception)
           (do
             (println "EXCEPTION")
