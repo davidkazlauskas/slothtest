@@ -516,24 +516,33 @@
 
 (defn diff-next-breakage []
   (if-let [curr (last @*breakage*)]
-    (do
-      (if (not= (:type curr) :equality)
-        (throw (RuntimeException.
+    (let [btype (:type curr)]
+      (cond
+        (= btype :equality)
+          (println
+            (diff-two-structs
+              (:expected curr)
+              (:actual curr)))
+        (= btype :exception)
+          (do
+            (println "EXCEPTION")
+            (println (:exception curr)))
+        :else
+          (throw (RuntimeException.
                  (str "Diff can be only applied"
-                      " to equality type of test."))))
-      (println
-        (diff-two-structs
-          (:expected curr)
-          (:actual curr))))))
+                      " to equality or exception type of test.")))
+            ))))
 
 (defn next-expression []
   (if-let [curr (last @*breakage*)]
-    (do
-      (if (not= (:type curr) :equality)
-        (throw (RuntimeException.
-                 (str "Only equality breakage expressions"
-                      " can be viewed."))))
-      (clojure.pprint/pprint (:expression curr)))))
+    (let [btype (:type curr)]
+     (cond
+       (#{:equality :exception} btype)
+         (clojure.pprint/pprint (:expression curr))
+       :else
+         (throw (RuntimeException.
+                 (str "Only equality or expression breakage"
+                      " expressions can be viewed.")))))))
 
 (defn delete-next-breakage []
   (if-let [curr (last @*breakage*)]
