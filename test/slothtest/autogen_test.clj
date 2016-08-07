@@ -19,7 +19,8 @@
      {:curr-tests {'(clojure.core/+ 1 2) 3},
       :metadata {:apiversion 1}})
     '{:metadata {:apiversion 2},
-      :curr-tests [{:expression (clojure.core/+ 1 2), :result 3}],
+      :curr-tests
+      [{:expression (clojure.core/+ 1 2), :type :equality, :result 3}],
       :expr-index {(clojure.core/+ 1 2) 0}})))
  (testing "some rnd name" (is (= (clojure.core/+ 1 2) '3))))
 
@@ -42,7 +43,8 @@
       :metadata {:apiversion 1}}),
    :result
    '{:metadata {:apiversion 2},
-     :curr-tests [{:expression (clojure.core/+ 1 2), :result 3}],
+     :curr-tests
+     [{:expression (clojure.core/+ 1 2), :type :equality, :result 3}],
      :expr-index {(clojure.core/+ 1 2) 0}}}
   {:type :equality,
    :expression '(clojure.core/+ 1 2),
