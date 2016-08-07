@@ -533,7 +533,9 @@
                       " to equality or exception type of test.")))
             ))))
 
-(defn next-expression []
+(defn next-expression
+  "Pretty print next breakage expression"
+  []
   (if-let [curr (last @*breakage*)]
     (let [btype (:type curr)]
      (cond
@@ -543,6 +545,19 @@
          (throw (RuntimeException.
                  (str "Only equality or expression breakage"
                       " expressions can be viewed.")))))))
+
+(defn next-expression-value
+  "Return next breakage expression"
+  []
+  (if-let [curr (last @*breakage*)]
+    (let [btype (:type curr)]
+     (cond
+       (#{:equality :exception} btype)
+         (:expression curr)
+       :else
+         (throw (RuntimeException.
+                 (str "Only equality or expression breakage"
+                      " expressions can be returned")))))))
 
 (defn delete-next-breakage []
   (if-let [curr (last @*breakage*)]
