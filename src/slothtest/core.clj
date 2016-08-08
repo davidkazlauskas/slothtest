@@ -546,6 +546,7 @@
 
 ; TODO: make function save specs
 ; TODO: expect breakage based on and perform action
+; TODO: travel breaking expressions and update
 
 (defn diff-next-breakage []
   (if-let [curr (last @*breakage*)]
