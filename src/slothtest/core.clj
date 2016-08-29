@@ -18,6 +18,8 @@
 
 (def ^:dynamic *breakage* nil)
 
+(def ^:dynamic *lastcapture* (atom nil))
+
 (defn- notestns []
   *notestns*)
 
@@ -30,7 +32,7 @@
 (defn- diff-cmd []
   *diffcmd*)
 
-(defn- ppr [the-struct]
+(defn ppr [the-struct]
   (clojure.pprint/write
     the-struct :stream nil))
 
@@ -157,7 +159,7 @@
                                     (conj (:nodes toup) the-node)))))))))
           acc)))))
 
-(defn- sort-result-expr [the-expr]
+(defn sort-result-expr [the-expr]
   ; better for diffing
   (cond
     (or (list? the-expr) (seq? the-expr))
@@ -616,6 +618,48 @@
             :result `'~(:actual curr))))
       (skip-next-breakage))
     0))
+
+(defmacro capture-function
+  "Capture function call with it's arguments"
+  [the-form]
+  (let [the-func (first the-form)
+        args (rest the-form)]
+   `(let [evaled# (mapv eval (list ~@args))
+          the-res# (apply ~the-func evaled#)]
+      (reset! *lastcapture*
+              {:inputs (apply list
+                         (cons ~(ns-resolve-list the-func) evaled#))
+               :outputs the-res#})
+      the-res#)))
+
+(defn last-capture
+  "Return last capture data"
+  []
+  @*lastcapture*)
+
+(defn view-last-capture
+  "Pretty print last capture"
+  []
+  (clojure.pprint/pprint @*lastcapture*))
+
+(defn last-capture-still-valid
+  "Check if last capture still returns the same result"
+  []
+  (if-let [lc @*lastcapture*]
+    (= (eval (:inputs lc)) (:outputs lc))
+    (throw (RuntimeException.
+             (str "Nothing was captured for checking.")))))
+
+(defn save-last-capture
+  "Save last captured function call."
+  [& extraargs]
+  (if-let [lc @*lastcapture*]
+    (save-specification
+      `'~(:inputs lc)
+      `'~(:outputs lc)
+      (map eval extraargs))
+    (throw (RuntimeException.
+             (str "Nothing was captured for saving.")))))
 
 (comment
   "Execute this test suite, generated sources should be identical."

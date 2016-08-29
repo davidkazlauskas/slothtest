@@ -147,6 +147,39 @@ Delete:
 (delete-next-breakage)
 ```
 
+## Capture expression in flight
+
+Ever had some deep nested code and would like to take a snapshot
+of a function call with arguments in specific time and specific place?
+Now you can do that. Simply wrap any expression in your code with
+capture-function and view it later, if you like the result - save it.
+
+```clojure
+; seamless: program flow is uninterrupted
+; and result saved.
+(do
+  (* 3
+    (capture-function (+ (- 3 2) 2))))
+```
+
+View the results:
+```clojure
+; view last result
+(is (= (last-capture) {:inputs (clojure.core/+ 1 2), :outputs 3}))
+
+; pretty print last result
+(view-last-capture)
+
+; Check if calling function again with
+; same parameters still yields the same result
+(last-capture-still-valid)
+
+; Save last capture to test suite.
+; Optional test suite name and specification
+; description arguments are supported.
+(save-last-capture :suite "some_suite")
+```
+
 ## Selecting test suite name and specification description
 
 Default test suite name will be "autogen" and default description
