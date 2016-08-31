@@ -625,10 +625,13 @@
   (let [the-func (first the-form)
         args (rest the-form)]
    `(let [evaled# (mapv eval (list ~@args))
+          inputs# (apply list
+                   (cons ~(ns-resolve-list the-func) evaled#))
+          ; if exception is thrown at least save inputs
+          _# (reset! *lastcapture* {:inputs inputs#})
           the-res# (apply ~the-func evaled#)]
       (reset! *lastcapture*
-              {:inputs (apply list
-                         (cons ~(ns-resolve-list the-func) evaled#))
+              {:inputs inputs#
                :outputs the-res#})
       the-res#)))
 
