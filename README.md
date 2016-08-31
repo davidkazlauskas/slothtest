@@ -129,6 +129,7 @@ To get all the data about next breakage call:
 
 Say you have decided if breakage is appropriate. Now you have three choices:
 - Skip breakage - will skip it, and will move to the next one, it will appear again calling update-breakage
+- Try skip breakage - run next breakage test again and if it succeeds skip it
 - Approve breakage - agree with it and update the test result
 - Delete breakage - delete the entire test that broke
 

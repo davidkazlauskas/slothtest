@@ -16,7 +16,7 @@
 (def ^:dynamic *diffcmd*
   (or (System/getenv "SLOTHTEST_DIFFCMD") "diff -y '%1$s' '%2$s'"))
 
-(def ^:dynamic *breakage* nil)
+(def ^:dynamic *breakage* (atom nil))
 
 (def ^:dynamic *lastcapture* (atom nil))
 
@@ -533,8 +533,23 @@
   (let [curr (:curr-tests (curr-test-struct))
         ; we'll be popping off the end
         breakage (filterv some? (reverse (map single-node-eval curr)))]
-    (def ^:dynamic *breakage* (atom breakage))
+    (reset! *breakage* breakage)
     (count breakage)))
+
+(defn try-skip-next-breakage
+  "Run the next breakage test and skip it if it succeeds."
+  []
+  (if-let [last-break (first @*breakage*)]
+    (let [new-eval (single-node-eval (:orig last-break))]
+      (if-not new-eval
+        [:skipped (skip-next-breakage)]
+        (do
+          (swap! *breakage*
+                 (fn [old]
+                   (conj (pop old) new-eval)))
+          [:stillbroken (count @*breakage*)])))
+    (throw (RuntimeException.
+                 (str "No breakages to skip.")))))
 
 (defn skip-next-breakage []
   (swap! *breakage*
@@ -549,7 +564,6 @@
 ; TODO: make function save specs
 ; TODO: expect breakage based on and perform action
 ; TODO: travel breaking expressions and update
-
 (defn diff-next-breakage []
   (if-let [curr (last @*breakage*)]
     (let [btype (:type curr)]
