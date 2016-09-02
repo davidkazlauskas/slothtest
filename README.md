@@ -138,6 +138,11 @@ Skip:
 (skip-next-breakage)
 ```
 
+Try to skip breakage if the test passes gain:
+```clojure
+(try-skip-next-breakage)
+```
+
 Approve:
 ```clojure
 (approve-next-breakage)
