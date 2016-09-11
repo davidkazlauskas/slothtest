@@ -528,6 +528,13 @@
     (reset! *breakage* breakage)
     (count breakage)))
 
+(defn skip-next-breakage []
+  (swap! *breakage*
+         (fn [curr]
+           (if (not (empty? curr))
+            (pop curr))))
+  (count @*breakage*))
+
 (defn try-skip-next-breakage
   "Run the next breakage test and skip it if it succeeds."
   []
@@ -542,13 +549,6 @@
           [:stillbroken (count @*breakage*)])))
     (throw (RuntimeException.
                  (str "No breakages to skip.")))))
-
-(defn skip-next-breakage []
-  (swap! *breakage*
-         (fn [curr]
-           (if (not (empty? curr))
-            (pop curr))))
-  (count @*breakage*))
 
 (defn next-breakage []
   (last @*breakage*))
