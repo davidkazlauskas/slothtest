@@ -36,22 +36,32 @@
   (clojure.pprint/write
     the-struct :stream nil))
 
-(defn- sort-if-map-or-set [dat]
-  (cond (map? dat)
-        (into (sorted-map) dat)
-        (set? dat)
-        (into (sorted-set) dat)
-        :else
-        dat))
+(defn sort-result-expr [the-expr]
+  ; better for diffing
+  (cond
+    (or (list? the-expr) (seq? the-expr))
+      (doall
+        (map sort-result-expr the-expr))
+    (vector? the-expr)
+      (mapv sort-result-expr the-expr)
+    (map? the-expr)
+      (into (sorted-map)
+            (map
+              (fn [[k v]] [k (sort-result-expr v)])
+              the-expr))
+    (set? the-expr)
+      (into (sorted-set)
+            (map sort-result-expr the-expr))
+    :else the-expr))
 
-(defn- diff-two-structs [a b]
+(defn diff-two-structs [a b]
   (let [af (temp-file)
         bf (temp-file)
         can-a (.getCanonicalPath af)
         can-b (.getCanonicalPath bf)]
     (try
-      (spit (io/writer af) (ppr (sort-if-map-or-set a)))
-      (spit (io/writer bf) (ppr (sort-if-map-or-set b)))
+      (spit (io/writer af) (ppr (sort-result-expr a)))
+      (spit (io/writer bf) (ppr (sort-result-expr b)))
       (let [res (sh/sh "sh" "-c" (format (diff-cmd) can-a can-b))
             out (:out res)]
         out)
@@ -158,24 +168,6 @@
                                     :nodes
                                     (conj (:nodes toup) the-node)))))))))
           acc)))))
-
-(defn sort-result-expr [the-expr]
-  ; better for diffing
-  (cond
-    (or (list? the-expr) (seq? the-expr))
-      (doall
-        (map sort-result-expr the-expr))
-    (vector? the-expr)
-      (mapv sort-result-expr the-expr)
-    (map? the-expr)
-      (into (sorted-map)
-            (map
-              (fn [[k v]] [k (sort-result-expr v)])
-              the-expr))
-    (set? the-expr)
-      (into (sorted-set)
-            (map sort-result-expr the-expr))
-    :else the-expr))
 
 (defn- render-is-clauses [the-nodes]
   (for [i the-nodes]
