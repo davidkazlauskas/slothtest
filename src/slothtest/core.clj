@@ -651,6 +651,11 @@
   []
   (clojure.pprint/pprint @*lastcapture*))
 
+(defn call-last-capture
+  "Call last capture and return the result"
+  []
+  (eval (:inputs @*lastcapture*)))
+
 (defn last-capture-still-valid
   "Check if last capture still returns the same result"
   []

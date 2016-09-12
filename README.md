@@ -180,6 +180,9 @@ View the results:
 ; same parameters still yields the same result
 (last-capture-still-valid)
 
+; Call last capture and return the result
+(call-last-capture)
+
 ; Save last capture to test suite.
 ; Optional test suite name and specification
 ; description arguments are supported.
