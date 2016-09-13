@@ -665,12 +665,24 @@
              (str "Nothing was captured for checking.")))))
 
 (defn save-last-capture
-  "Save last captured function call."
+  "Save last captured function call with its captured output
+  (WILL NOT EVALUATE FUNCTION FOR UPDATED RESULT, see save-last-capture-eval)."
   [& extraargs]
   (if-let [lc @*lastcapture*]
     (save-specification
       `'~(:inputs lc)
       `'~(:outputs lc)
+      (map eval extraargs))
+    (throw (RuntimeException.
+             (str "Nothing was captured for saving.")))))
+
+(defn save-last-capture-eval
+  "Save last captured function with its freshly evaluated results."
+  [& extraargs]
+  (if-let [lc @*lastcapture*]
+    (save-specification
+      `'~(:inputs lc)
+      `'~(eval (:inputs lc))
       (map eval extraargs))
     (throw (RuntimeException.
              (str "Nothing was captured for saving.")))))
