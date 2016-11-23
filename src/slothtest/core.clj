@@ -433,8 +433,8 @@
 (defn- require-expression-dependencies [expr]
   (cond
     (symbol? expr)
-      (let [namspc (symbol (namespace expr))]
-        (require namspc))
+      (if-let [namspc (namespace expr)]
+        (require (symbol namspc)))
     (or (list? expr) (vector? expr) (set? expr))
       (doseq [i expr]
         (require-expression-dependencies i))
