@@ -430,6 +430,24 @@
       :deleted)
     :notfound))
 
+(defn- map-recursive-type-preserve [the-function the-item]
+  (let [parted (partial map-recursive-type-preserve the-function)]
+    (cond (vector? the-item)
+          (mapv parted the-item)
+          (seq? the-item)
+          (map parted the-item)
+          (set? the-item)
+          (into #{} (map parted the-item))
+          (map? the-item)
+          (into {} (map (fn [[k v]] [(parted k) (parted v)]) the-item))
+          :else (the-function the-item))))
+
+(defn- if-replace [condition replacement]
+  (fn [the-item]
+    (if (condition the-item)
+      (replacement the-item)
+      the-item)))
+
 (defn- require-expression-dependencies [expr]
   (cond
     (symbol? expr)
@@ -686,6 +704,28 @@
       (map eval extraargs))
     (throw (RuntimeException.
              (str "Nothing was captured for saving.")))))
+
+(defn rename-symbol
+  "Rename symbol in test suite to new name. Expected
+  values are clojure symbols with namespace qualifications."
+  [symbol-prev-name symbol-new-name]
+  (let [curr-struct (curr-test-struct)
+        the-count (atom 0)
+        mapper (partial map-recursive-type-preserve
+                        (if-replace #(do
+                           (= % symbol-prev-name))
+                           (fn [i] (swap! the-count inc) symbol-new-name)))]
+    (-> curr-struct
+        (update :curr-tests
+                (partial mapv
+                  (fn [curr]
+                    (let [expression (:expression curr)
+                          nexpr (update curr :expression mapper)]
+                      (if (= (:type curr) :equality)
+                        (update nexpr :result mapper)
+                        nexpr)))))
+        (save-struct))
+    @the-count))
 
 (comment
   "Execute this test suite, generated sources should be identical."
