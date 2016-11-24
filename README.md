@@ -197,5 +197,14 @@ make test suite name descriptive. They can do so with:
 ```clojure
 (save-spec (+ 1 2) :suite "some_valid_symbol" :description "This tests basic arithmetic")
 ```
+## Renaming symbol in tests automatically
+
+Feared of renaming a function? Rename them in tests with one call to rename-symbol
+
+```clojure
+; find every symbol in tests to 'some.namespace/foo
+; and replace it with 'some.namespace/bar
+(rename-symbol 'some.namespace/foo 'some.namespace/bar)
+```
 
 Happy time spent developing instead of writing tedious repetitive tests!
