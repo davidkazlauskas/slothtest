@@ -350,14 +350,18 @@
                   " start with a number. Invalid name: "
                   "\"" the-name "\".")))))
 
-(defn- update-node [the-map new-node]
+(defn- update-node-by-expr [the-map new-node search-by]
   (if-let [idx (get-in
                  the-map
-                 [:expr-index (:expression new-node)])]
+                 [:expr-index search-by])]
     (assoc-in the-map [:curr-tests idx] new-node)
     (update-in the-map [:curr-tests]
                (fn [the-vec]
                  (conj the-vec new-node)))))
+
+(defn- update-node [the-map new-node]
+  (update-node-by-expr
+    the-map new-node (:expression new-node)))
 
 (defn- delete-node [the-map to-delete]
   (if-let [idx (get-in
@@ -370,6 +374,47 @@
                                 (if (not= idx idxc)
                                   sec)))
                       (filterv some?))))))
+
+(defn dissoc-in [the-map the-keys]
+  (cond
+    (= (count the-keys) 1)
+    (dissoc the-map (first the-keys))
+    (> (count the-keys) 1)
+    (update-in the-map (into [] (butlast the-keys))
+               (fn [i]
+                 (dissoc i (last the-keys))))
+    :else the-map))
+
+(defn- keys-for-dissoc-wrap [the-expr]
+  (into [] (rest (rest the-expr))))
+
+(defn- add-key-to-dissoc-wrap [curr-vec new-key]
+  (if ((into #{} curr-vec) new-key)
+    curr-vec
+    (conj curr-vec new-key)))
+
+(defmacro dissoc-wrap
+  "Internal macro used when dissociating keys from map.
+  Should only be added automatically."
+  [the-value & the-vecs]
+  `(-> ~the-value
+       ~@(map #(identity `(dissoc-in ~%)) the-vecs)))
+
+(defn- is-symbol-dissoc-wrap [the-symbol]
+  (or (= the-symbol 'dissoc-wrap) (= the-symbol 'slothtest.core/dissoc-wrap)))
+
+(defn- expr-of-dissoc-wrap [the-expr]
+  (second the-expr))
+
+(defn- dissoc-expression [curr-expr the-key]
+  (assert (vector? the-key) "Key for dissoc expression must be a vector.")
+  (if (is-symbol-dissoc-wrap (first curr-expr))
+    `(dissoc-wrap ~(expr-of-dissoc-wrap curr-expr)
+      ~@(add-key-to-dissoc-wrap
+          (keys-for-dissoc-wrap curr-expr)
+          the-key))
+    `(dissoc-wrap ~curr-expr ~the-key)))
+
 
 (defn- add-test-expr [the-map func the-val
                       & {:keys [suite description]
@@ -628,7 +673,9 @@
       (skip-next-breakage))
     0))
 
-(defn approve-next-breakage []
+(defn approve-next-breakage
+  "Approve next breakage and update test sources."
+  []
   (if-let [curr (last @*breakage*)]
     (do
       (if (not= (:type curr) :equality)
@@ -641,6 +688,26 @@
             (:orig curr)
             :result `'~(:actual curr))))
       (skip-next-breakage))
+    0))
+
+(defn dissoc-next-expression
+  "Dissoc expression to not include certain keys in key-list. Can stack."
+  [& key-list]
+  (if-let [curr (last @*breakage*)]
+    (do
+      (if (not= (:type curr) :equality)
+        (throw (RuntimeException.
+                 (str "Only equality breakage may"
+                      " be dissociated."))))
+      (save-struct
+        (update-node-by-expr
+          (curr-test-struct)
+          (-> (:orig curr)
+              (assoc :expression
+                     `'~(dissoc-expression
+                          (eval (get-in curr [:orig :expression]))
+                          (into [] key-list))))
+          (get-in curr [:orig :expression]))))
     0))
 
 (defmacro capture-function

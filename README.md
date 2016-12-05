@@ -207,4 +207,26 @@ Feared of renaming a function? Rename them in tests with one call to rename-symb
 (rename-symbol 'some.namespace/foo 'some.namespace/bar)
 ```
 
+## Nested unwanted values in map
+
+From time to time test maps have some indeterministic values, like
+random numbers. They can be removed simply by dissociating
+next expression when updating breakages. More than one key can be dissociated
+from a map.
+
+```clojure
+; expression with random number
+(save-spec {:a 1 :b {:c (rand-int 100)}})
+
+; update breakage - chances are, this function is breaking when run again
+(update-breakage)
+
+; dissociate the key that you want to remove in map (multiple keys can be added)
+(dissoc-next-expression :b :c)
+
+; once it is good enough approve the breakage
+(approve-next-breakage)
+
+```
+
 Happy time spent developing instead of writing tedious repetitive tests!
