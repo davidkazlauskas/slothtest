@@ -524,7 +524,7 @@
   ; drop quotes with two level eval
   (let [[ev except] (eval-or-execpt (eval expr))
         evex (eval expected)]
-    (if ev
+    (if (some? ev)
       (if (= ev evex)
         nil
         ; TODO: REPORT BREAKAGE WITH DIFF
