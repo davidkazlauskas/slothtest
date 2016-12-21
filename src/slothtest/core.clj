@@ -423,7 +423,7 @@
   all compiled functions with :COMPILED_FUNCTION keyword"
   [expression]
   (map-recursive-type-preserve
-    (if-replace #(clojure.test/function? %)
+    (if-replace #(and (not (symbol? %)) (clojure.test/function? %))
                  (constantly :COMPILED_FUNCTION))
      expression))
 
