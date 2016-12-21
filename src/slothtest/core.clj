@@ -400,6 +400,15 @@
   `(-> ~the-value
        ~@(map #(identity `(dissoc-in ~%)) the-vecs)))
 
+(defn remove-functions
+  "Wrap any value with this function to recursively replace
+  all compiled functions with :COMPILED_FUNCTION keyword"
+  [expression]
+  (map-recursive-type-preserve
+    (if-replace #(clojure.test/function? %)
+                 (constantly :COMPILED_FUNCTION))
+     expression))
+
 (defn- is-symbol-dissoc-wrap [the-symbol]
   (or (= the-symbol 'dissoc-wrap) (= the-symbol 'slothtest.core/dissoc-wrap)))
 
@@ -779,8 +788,7 @@
   (let [curr-struct (curr-test-struct)
         the-count (atom 0)
         mapper (partial map-recursive-type-preserve
-                        (if-replace #(do
-                           (= % symbol-prev-name))
+                        (if-replace #(= % symbol-prev-name)
                            (fn [i] (swap! the-count inc) symbol-new-name)))]
     (-> curr-struct
         (update :curr-tests
