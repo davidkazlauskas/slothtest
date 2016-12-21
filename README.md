@@ -229,4 +229,15 @@ from a map.
 
 ```
 
+## Removing compiled pesky functions
+
+Sometimes expression contains compiled clojure functions that cannot be serialized back
+when reading. You can wrap any expression with remove-functions function and every
+single instance of a compiled function will be replaced by a :COMPILED_FUNCTION keyword recursively.
+
+```clojure
+; saved as '(:a :b [:c :d {:e :COMPILED_FUNCTION}])
+(save-spec (remove-functions '(:a :b [:c :d {:e +}])))
+```
+
 Happy time spent developing instead of writing tedious repetitive tests!
