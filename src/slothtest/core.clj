@@ -393,6 +393,24 @@
     curr-vec
     (conj curr-vec new-key)))
 
+(defn- map-recursive-type-preserve [the-function the-item]
+  (let [parted (partial map-recursive-type-preserve the-function)]
+    (cond (vector? the-item)
+          (mapv parted the-item)
+          (seq? the-item)
+          (map parted the-item)
+          (set? the-item)
+          (into #{} (map parted the-item))
+          (map? the-item)
+          (into {} (map (fn [[k v]] [(parted k) (parted v)]) the-item))
+          :else (the-function the-item))))
+
+(defn- if-replace [condition replacement]
+  (fn [the-item]
+    (if (condition the-item)
+      (replacement the-item)
+      the-item)))
+
 (defmacro dissoc-wrap
   "Internal macro used when dissociating keys from map.
   Should only be added automatically."
@@ -483,24 +501,6 @@
       (save-struct removal-res)
       :deleted)
     :notfound))
-
-(defn- map-recursive-type-preserve [the-function the-item]
-  (let [parted (partial map-recursive-type-preserve the-function)]
-    (cond (vector? the-item)
-          (mapv parted the-item)
-          (seq? the-item)
-          (map parted the-item)
-          (set? the-item)
-          (into #{} (map parted the-item))
-          (map? the-item)
-          (into {} (map (fn [[k v]] [(parted k) (parted v)]) the-item))
-          :else (the-function the-item))))
-
-(defn- if-replace [condition replacement]
-  (fn [the-item]
-    (if (condition the-item)
-      (replacement the-item)
-      the-item)))
 
 (defn- require-expression-dependencies [expr]
   (cond
