@@ -506,7 +506,11 @@
   (cond
     (symbol? expr)
       (if-let [namspc (namespace expr)]
-        (require (symbol namspc)))
+        (try
+          (require (symbol namspc))
+          (catch Exception e
+            (println (str "Failed requiring namespace "
+                          namspc ": " e)))))
     (or (list? expr) (vector? expr) (set? expr))
       (doseq [i expr]
         (require-expression-dependencies i))

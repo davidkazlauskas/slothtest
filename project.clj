@@ -1,4 +1,4 @@
-(defproject slothtest "0.5.13"
+(defproject slothtest "0.5.14"
   :description "Slothtest - simple automatic testing solution"
   :url "https://github.com/davidkazlauskas/slothtest"
   :license {:name "Eclipse Public License"
