@@ -418,14 +418,20 @@
   `(-> ~the-value
        ~@(map #(identity `(dissoc-in ~%)) the-vecs)))
 
+(defn- atom? [value]
+  (instance? clojure.lang.Atom value))
+
 (defn remove-functions
   "Wrap any value with this function to recursively replace
   all compiled functions with :COMPILED_FUNCTION keyword"
   [expression]
-  (map-recursive-type-preserve
-    (if-replace #(and (not (symbol? %)) (clojure.test/function? %))
-                 (constantly :COMPILED_FUNCTION))
-     expression))
+  (->> expression
+    (map-recursive-type-preserve
+      (if-replace #(and (not (symbol? %)) (clojure.test/function? %))
+                   (constantly :COMPILED_FUNCTION)))
+    (map-recursive-type-preserve
+      (if-replace #(and (not (symbol? %)) (atom? %))
+                   (constantly :ATOM)))))
 
 (defn- is-symbol-dissoc-wrap [the-symbol]
   (or (= the-symbol 'dissoc-wrap) (= the-symbol 'slothtest.core/dissoc-wrap)))
